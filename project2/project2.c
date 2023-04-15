@@ -44,8 +44,8 @@ int loadByteFormMem(unsigned int rs, unsigned int rt, int simm) {
 						
 
 int printRegs() {
-	printf("Current register values:\n");
-	printf("----------------------------------\n");
+	printf("Current register values :\n");
+	printf("-------------------------------------------\n");
 	printf("PC: 0x%x\n", pc);
 	printf("Registers:\n");
 	for(int i =0; i< 32; i++) {
@@ -57,9 +57,8 @@ int printRegs() {
 int printDataSeg(int* dataseg, int* textseg,int dataSize, int textSize, int* option_m) {
 	int start = option_m[0];
 	int end = option_m[1];
-	
-	printf("Memory content [0x%x..0x%x]:\n", option_m[0], option_m[1]);
-	printf("----------------------------------\n");
+	printf("Memory content [0x%x..0x%x] :\n", option_m[0], option_m[1]);
+	printf("-------------------------------------------\n");
 	
 	for(unsigned int addr = start; addr <= end; addr=addr+4) {
 		if(TEXTSEG_ADDR <= addr & addr < TEXTSEG_ADDR + textSize){
@@ -72,7 +71,6 @@ int printDataSeg(int* dataseg, int* textseg,int dataSize, int textSize, int* opt
 			printf("0x%x: 0x0\n", addr);
 		}
 	}
-	printf("\n");
 }
 
 int printNullDataSeg(int* option_m) {
@@ -84,11 +82,13 @@ int printNullDataSeg(int* option_m) {
 	for(unsigned int addr = start; addr <= end; addr=addr+4) {
 		printf("0x%x: 0x0\n", addr);
 	}
-	printf("\n");
 }
 
 
 int main(int argc, char* argv[]) {
+	// Register initialize
+	for(int i=0; i < 32; i++) { regs[i] = 0; }
+	
 	int option_m[2] = {-1, -1};
 	int option_d = 0;
 	int option_n = -1;
@@ -153,8 +153,6 @@ int main(int argc, char* argv[]) {
 	}
 	
 
-	// Register initialize
-	for(int i=0; i < 32; i++) { regs[i] = 0; }
 
 	while(1) {
 		if(option_n == 0) { break; }
@@ -214,7 +212,7 @@ int main(int argc, char* argv[]) {
 					// jal
 					regs[31] = pc;
 				}
-				pc = (pc & (63 << 26)) | (target*4);
+				pc = (pc & (15 << 28)) | (target*4);
 			}
 			else {
 				// I format
