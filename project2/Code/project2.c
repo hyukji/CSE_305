@@ -250,6 +250,7 @@ int main(int argc, char* argv[]) {
 						regs[rt] = uimm << 16;
 						break;
 					case 0x23: // lw
+						printf("lw in here");
 						regs[rt] = DATA_SEGMENT[(regs[rs] + simm - DATASEG_ADDR)/4];
 						break;
 					case 0x20: // lb
