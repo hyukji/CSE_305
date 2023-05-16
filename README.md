@@ -1,5 +1,4 @@
-# CSE_305
-Projects of Computer architecture lecture in DGIST
+Projects of Computer architecture lecture(CSE-305) in DGIST
   
 ## Environment
 - Ubuntu : 20.04.5 LTS  
