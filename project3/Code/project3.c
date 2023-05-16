@@ -128,8 +128,8 @@ int printNullDataSeg(int* option_m) {
 	int start = option_m[0];
 	int end = option_m[1];
 	
-	printf("Memory content [0x%x..0x%x]:\n", option_m[0], option_m[1]);
-	printf("----------------------------------\n");
+	printf("Memory content [0x%x..0x%x] :\n", option_m[0], option_m[1]);
+	printf("-------------------------------------------\n");
 	for(unsigned int addr = start; addr <= end; addr=addr+4) {
 		printf("0x%x: 0x0\n", addr);
 	}
@@ -201,13 +201,18 @@ int main(int argc, char* argv[]) {
 	
 	
 	// if filesize is zero, then just print
-	if(!fileSize) {
-		if(!option_d) {
-			printRegs();
-			if(option_m[0] != -1){
-				printNullDataSeg(option_m);
-			}
+	if(!fileSize || fileSize == 1) {
+		printf("==== Completion cycle : %d ====\n\n", 0);
+		
+		printf("Current pipeline PC state :\n");
+		printf("{||||}\n");
+		
+		printf("\n");
+		printRegs();
+		if(option_m[0] != -1){
+			printNullDataSeg(option_m);
 		}
+		
 		
 		free(buf);
 		return 0;
@@ -234,7 +239,6 @@ int main(int argc, char* argv[]) {
 	EXMEM _EXMEM = {0, };
 	MEMWB _MEMWB = {0, };
 	
-	
 	int cycles = 0;
 	int pipeline_output[5] = {0, 0, 0, 0, 0};
 	while(1) {
@@ -252,6 +256,7 @@ int main(int argc, char* argv[]) {
 		
 		// WB
 		if(_MEMWB.val){       
+        		
 			pipeline_output[4] = _MEMWB.pc;
 			if(_MEMWB.control == 3) { // MemtoReg, RegWrite
 				regs[_MEMWB.REGDst] = _MEMWB.MEMOUT;
@@ -264,7 +269,6 @@ int main(int argc, char* argv[]) {
 		}
 		
 		// MEM
-		
 		if(_EXMEM.val){
 			int rt_value = regs[_EXMEM.rt];
 			// forward MEMWB to MEM for sb, sw
@@ -273,9 +277,9 @@ int main(int argc, char* argv[]) {
 					rt_value = regs[_MEMWB.REGDst];
 				}
 			}
+			 
 			
 			pipeline_output[3] = _EXMEM.pc;
-			// control bit = MemtoReg ,RegWrite / eqBrch, neBrch, OneByte, MemRead, MemWrite / 
 			switch(_EXMEM.control) {
 				case 1:  //sw
 					DATA_SEGMENT[_EXMEM.ALUOUT/4] = regs[_EXMEM.rt];
@@ -308,7 +312,6 @@ int main(int argc, char* argv[]) {
 			if(_EXMEM.control == 16 || _EXMEM.control == 8) {
 				if((option_taken && !MEM_Taken) || (!option_taken && MEM_Taken)) {
 					// prediction failed
-
 					pc = (option_taken) ? _EXMEM.pc + 4:_EXMEM.BRTarget;
 					
 					next_EXMEM.val = 0;
@@ -348,7 +351,6 @@ int main(int argc, char* argv[]) {
 		// EX
 		if(_IDEX.val){
 		
-/*        		printf("IDEX 0x%x, op: %d, rs: %d, rt: %d, rd, %d, control : %d\n", _IDEX.pc,_IDEX.op, _IDEX.rs, _IDEX.rt, _IDEX.rd, _IDEX.control);*/
 			pipeline_output[2] = _IDEX.pc;
 			
 			int rs_value = regs[_IDEX.rs];
@@ -376,8 +378,6 @@ int main(int argc, char* argv[]) {
 				}
 			}
 			
-			
-/*			printf("rs_val : %d 0x%x , rt_value : %d 0x%x \n", rs_value, rs_value, rt_value, rt_value);*/
 			
 			// ALU 
 			if(_IDEX.op == 0) {
@@ -617,19 +617,25 @@ int main(int argc, char* argv[]) {
 		}
 	}
 	
+	
 	printf("==== Completion cycle : %d ====\n\n", cycles);
 	int last_pipline[5] = {pc, _IFID.pc, _IDEX.pc, _EXMEM.pc, _MEMWB.pc};
-	printPipelineState(TEXTSEG_SIZE, last_pipline);
+	if(option_n == 0) { printPipelineState(TEXTSEG_SIZE, pipeline_output); }
+	else { 
+		int last_pipline[5] = {pc, _IFID.pc, _IDEX.pc, _EXMEM.pc, _MEMWB.pc};
+		printPipelineState(TEXTSEG_SIZE, last_pipline); 
+	}
+	
 	printf("\n");
 	printRegs();
 	if(option_m[0] != -1){
 		printDataSeg(DATA_SEGMENT, TEXT_SEGMENT, DATASEG_SIZE, TEXTSEG_SIZE, option_m);
 	}
 	
+	
 
 	free(DATA_SEGMENT);
 	free(TEXT_SEGMENT);
 	
 	return 0;
-
 }
