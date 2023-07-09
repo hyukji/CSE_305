@@ -40,6 +40,9 @@ ID stage branch forwarding이 아닌 MEM 단계에서 분기 결정되는 것으
  - Always Not Taken success : None
  - Always Not Taken fail : 3 flushing
 
+
+### project4
+cache L1, L2의 Capacity, Associativity, Block size를 입력 받아 캐시를 구성하고, instructions(write or read) 들을 받아 miss rate, evictions 등을 계산했다. 보고서를 통해 Capacity, Associativity, Block size 변화에 따른 miss rate와 evictions 개수와 이유를 분석했다.
   
   
   
